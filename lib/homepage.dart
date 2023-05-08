@@ -77,93 +77,118 @@ class _MyHomePageState extends State<MyHomePage> {
                                       IconButton(
                                         onPressed: () {
                                           String name = state.data[index].name;
+                                          var value = context.read<TodoBloc>();
                                           showDialog(
                                               context: context,
-                                              builder: (context) => AlertDialog(
-                                                    title: TextFormField(
-                                                      initialValue: name,
-                                                      decoration:
-                                                          const InputDecoration(
-                                                              hintText: "todo"),
-                                                      onChanged: (val) {
-                                                        name = val;
-                                                      },
-                                                    ),
-                                                    actions: [
-                                                      BlocBuilder<TodoBloc,
-                                                          TodoState>(
-                                                        builder:
-                                                            (context, state) {
-                                                          if (state
-                                                              is TaskInProgress) {
-                                                            return Container();
-                                                          } else {
-                                                            return TextButton(
-                                                                onPressed: () {
-                                                                  Navigator.of(
+                                              builder:
+                                                  (_) => BlocProvider.value(
+                                                        value: value,
+                                                        child: BlocListener<
+                                                            TodoBloc,
+                                                            TodoState>(
+                                                          listener:
+                                                              (context, state) {
+                                                            if (state
+                                                                is TaskInProgress) {
+                                                              ScaffoldMessenger
+                                                                      .of(
                                                                           context)
-                                                                      .pop();
-                                                                },
-                                                                child:
-                                                                    const TodoText(
-                                                                  text: "Back",
-                                                                  color: Colors
-                                                                      .indigo,
-                                                                ));
-                                                          }
-                                                        },
-                                                      ),
-                                                      BlocBuilder<TodoBloc,
-                                                          TodoState>(
-                                                        builder:
-                                                            (context, state) {
-                                                          if (state
-                                                              is TaskInProgress) {
-                                                            return const CircularProgressIndicator();
-                                                          } else {
-                                                            return TextButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                Todo todo = Todo(
-                                                                    name,
-                                                                    state
-                                                                        .data[
-                                                                            index]
-                                                                        .id);
-                                                                await FirebaseFirestore
-                                                                    .instance
-                                                                    .collection(
-                                                                        "todos")
-                                                                    .doc(state
-                                                                        .data[
-                                                                            index]
-                                                                        .id)
-                                                                    .set(todo
-                                                                        .toJson());
-                                                                if (mounted) {
-                                                                  context
-                                                                      .read<
-                                                                          TodoBloc>()
-                                                                      .add(UpdateTodo(
-                                                                          todo,
-                                                                          index));
-                                                                  Navigator.of(
-                                                                          context)
-                                                                      .pop();
-                                                                }
+                                                                  .showSnackBar(
+                                                                      const SnackBar(
+                                                                duration:
+                                                                    Duration(
+                                                                        seconds:
+                                                                            1),
+                                                                content: TodoText(
+                                                                    text:
+                                                                        "Updating Please wait!!!",
+                                                                    color: Colors
+                                                                        .white),
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .indigo,
+                                                              ));
+                                                            }
+                                                          },
+                                                          child: AlertDialog(
+                                                            title:
+                                                                TextFormField(
+                                                              initialValue:
+                                                                  name,
+                                                              decoration:
+                                                                  const InputDecoration(
+                                                                      hintText:
+                                                                          "todo"),
+                                                              onChanged: (val) {
+                                                                name = val;
                                                               },
-                                                              child:
-                                                                  const TodoText(
-                                                                text: "Update",
-                                                                color: Colors
-                                                                    .indigo,
+                                                            ),
+                                                            actions: [
+                                                              BlocBuilder<
+                                                                  TodoBloc,
+                                                                  TodoState>(
+                                                                builder:
+                                                                    (context,
+                                                                        state) {
+                                                                  if (state
+                                                                      is TaskInProgress) {
+                                                                    return Container();
+                                                                  } else {
+                                                                    return TextButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          Navigator.of(context)
+                                                                              .pop();
+                                                                        },
+                                                                        child:
+                                                                            const TodoText(
+                                                                          text:
+                                                                              "Back",
+                                                                          color:
+                                                                              Colors.indigo,
+                                                                        ));
+                                                                  }
+                                                                },
                                                               ),
-                                                            );
-                                                          }
-                                                        },
-                                                      ),
-                                                    ],
-                                                  ));
+                                                              BlocBuilder<
+                                                                  TodoBloc,
+                                                                  TodoState>(
+                                                                builder:
+                                                                    (context,
+                                                                        state) {
+                                                                  if (state
+                                                                      is TaskInProgress) {
+                                                                    return const CircularProgressIndicator();
+                                                                  } else {
+                                                                    return TextButton(
+                                                                      onPressed:
+                                                                          () async {
+                                                                        Todo todo = Todo(
+                                                                            name,
+                                                                            state.data[index].id);
+                                                                        if (mounted) {
+                                                                          context.read<TodoBloc>().add(UpdateTodo(
+                                                                              todo,
+                                                                              index));
+                                                                          Navigator.of(context)
+                                                                              .pop();
+                                                                        }
+                                                                      },
+                                                                      child:
+                                                                          const TodoText(
+                                                                        text:
+                                                                            "Update",
+                                                                        color: Colors
+                                                                            .indigo,
+                                                                      ),
+                                                                    );
+                                                                  }
+                                                                },
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ));
                                         },
                                         icon: const Icon(
                                           Icons.edit,
@@ -174,65 +199,106 @@ class _MyHomePageState extends State<MyHomePage> {
                                         onPressed: () {
                                           showDialog(
                                               context: context,
-                                              builder: (context) => AlertDialog(
-                                                    title: const TodoText(
-                                                        text: "Are you sure?",
-                                                        color: Colors.indigo),
-                                                    actions: [
-                                                      TextButton(
-                                                          onPressed: () {
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                          },
-                                                          child: const TodoText(
-                                                            text: "No",
-                                                            color:
-                                                                Colors.indigo,
-                                                          )),
-                                                      BlocBuilder<TodoBloc,
-                                                          TodoState>(
-                                                        builder:
-                                                            (context, state) {
-                                                          if (state
-                                                              is TaskInProgress) {
-                                                            return const CircularProgressIndicator();
-                                                          } else {
-                                                            return TextButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                await FirebaseFirestore
-                                                                    .instance
-                                                                    .collection(
-                                                                        "todos")
-                                                                    .doc(state
-                                                                        .data[
-                                                                            index]
-                                                                        .id)
-                                                                    .delete();
-                                                                if (mounted) {
-                                                                  context
-                                                                      .read<
-                                                                          TodoBloc>()
-                                                                      .add(DeleteTodo(
-                                                                          index));
-                                                                  Navigator.of(
+                                              builder:
+                                                  (_) => BlocProvider.value(
+                                                        value: context
+                                                            .read<TodoBloc>(),
+                                                        child: BlocListener<
+                                                            TodoBloc,
+                                                            TodoState>(
+                                                          listener:
+                                                              (context, state) {
+                                                            if (state
+                                                                is TaskInProgress) {
+                                                              ScaffoldMessenger
+                                                                      .of(
                                                                           context)
-                                                                      .pop();
-                                                                }
-                                                              },
-                                                              child:
-                                                                  const TodoText(
-                                                                text: "Yes",
+                                                                  .showSnackBar(
+                                                                      const SnackBar(
+                                                                duration:
+                                                                    Duration(
+                                                                        seconds:
+                                                                            1),
+                                                                content: TodoText(
+                                                                    text:
+                                                                        "Deleting Please wait!!!",
+                                                                    color: Colors
+                                                                        .white),
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .indigo,
+                                                              ));
+                                                            }
+                                                          },
+                                                          child: AlertDialog(
+                                                            title: const TodoText(
+                                                                text:
+                                                                    "Are you sure?",
                                                                 color: Colors
-                                                                    .indigo,
+                                                                    .indigo),
+                                                            actions: [
+                                                              BlocBuilder<
+                                                                  TodoBloc,
+                                                                  TodoState>(
+                                                                builder:
+                                                                    (context,
+                                                                        state) {
+                                                                  if (state
+                                                                      is TaskInProgress) {
+                                                                    return Container();
+                                                                  } else {
+                                                                    return TextButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          Navigator.of(context)
+                                                                              .pop();
+                                                                        },
+                                                                        child:
+                                                                            const TodoText(
+                                                                          text:
+                                                                              "No",
+                                                                          color:
+                                                                              Colors.indigo,
+                                                                        ));
+                                                                  }
+                                                                },
                                                               ),
-                                                            );
-                                                          }
-                                                        },
-                                                      )
-                                                    ],
-                                                  ));
+                                                              BlocBuilder<
+                                                                  TodoBloc,
+                                                                  TodoState>(
+                                                                builder:
+                                                                    (context,
+                                                                        state) {
+                                                                  if (state
+                                                                      is TaskInProgress) {
+                                                                    return const CircularProgressIndicator();
+                                                                  } else {
+                                                                    return TextButton(
+                                                                      onPressed:
+                                                                          () async {
+                                                                        if (mounted) {
+                                                                          context
+                                                                              .read<TodoBloc>()
+                                                                              .add(DeleteTodo(index));
+                                                                          Navigator.of(context)
+                                                                              .pop();
+                                                                        }
+                                                                      },
+                                                                      child:
+                                                                          const TodoText(
+                                                                        text:
+                                                                            "Yes",
+                                                                        color: Colors
+                                                                            .indigo,
+                                                                      ),
+                                                                    );
+                                                                  }
+                                                                },
+                                                              )
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ));
                                         },
                                         icon: const Icon(
                                           Icons.delete,
@@ -269,41 +335,72 @@ class _MyHomePageState extends State<MyHomePage> {
           String name = "";
           showDialog(
               context: context,
-              builder: (context) => AlertDialog(
-                    title: TextFormField(
-                      decoration: const InputDecoration(hintText: "todo"),
-                      onChanged: (val) {
-                        name = val;
+              builder: (_) => BlocProvider.value(
+                    value: context.read<TodoBloc>(),
+                    child: BlocListener<TodoBloc, TodoState>(
+                      listener: (context, state) {
+                        if (state is TaskInProgress) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            duration: Duration(seconds: 1),
+                            content: TodoText(
+                                text: "Saving, Please wait!!!",
+                                color: Colors.white),
+                            backgroundColor: Colors.indigo,
+                          ));
+                        }
                       },
-                    ),
-                    actions: [
-                      TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
+                      child: AlertDialog(
+                        title: TextFormField(
+                          decoration: const InputDecoration(hintText: "todo"),
+                          onChanged: (val) {
+                            name = val;
                           },
-                          child: const TodoText(
-                            text: "Back",
-                            color: Colors.indigo,
-                          )),
-                      TextButton(
-                        onPressed: () async {
-                          String id = const Uuid().v4();
-                          Todo todo = Todo(name, id);
-                          await FirebaseFirestore.instance
-                              .collection("todos")
-                              .doc(id)
-                              .set(todo.toJson());
-                          if (mounted) {
-                            context.read<TodoBloc>().add(AddTodo(todo));
-                            Navigator.of(context).pop();
-                          }
-                        },
-                        child: const TodoText(
-                          text: "Save",
-                          color: Colors.indigo,
                         ),
+                        actions: [
+                          BlocBuilder<TodoBloc, TodoState>(
+                            builder: (context, state) {
+                              if (state is TaskInProgress) {
+                                return Container();
+                              } else {
+                                return TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const TodoText(
+                                      text: "Back",
+                                      color: Colors.indigo,
+                                    ));
+                              }
+                            },
+                          ),
+                          BlocBuilder<TodoBloc, TodoState>(
+                            builder: (context, state) {
+                              if (state is TaskInProgress) {
+                                return const CircularProgressIndicator();
+                              } else {
+                                return TextButton(
+                                  onPressed: () async {
+                                    String id = const Uuid().v4();
+                                    Todo todo = Todo(name, id);
+                                    if (mounted) {
+                                      context
+                                          .read<TodoBloc>()
+                                          .add(AddTodo(todo));
+                                      Navigator.of(context).pop();
+                                    }
+                                  },
+                                  child: const TodoText(
+                                    text: "Save",
+                                    color: Colors.indigo,
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ));
         },
       ),

@@ -27,25 +27,37 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     emit(TodosFetched(todoList));
   }
 
-  void addTodos(AddTodo event, Emitter emit) {
+  void addTodos(AddTodo event, Emitter emit) async {
     List<Todo> list = List.from(state.data);
     emit(TaskInProgress(list));
+    await FirebaseFirestore.instance
+        .collection("todos")
+        .doc(event.todo.id)
+        .set(event.todo.toJson());
     List<Todo> todosData = List.from(state.data);
     todosData.add(event.todo);
     emit(TodoAdded(todosData));
   }
 
-  void deleteTodos(DeleteTodo event, Emitter emit) {
+  void deleteTodos(DeleteTodo event, Emitter emit) async {
     List<Todo> list = List.from(state.data);
     emit(TaskInProgress(list));
+    await FirebaseFirestore.instance
+        .collection("todos")
+        .doc(state.data[event.index].id)
+        .delete();
     List<Todo> todosData = List.from(state.data);
     todosData.removeAt(event.index);
     emit(TodoDeleted(todosData));
   }
 
-  void updateTodos(UpdateTodo event, Emitter emit) {
+  void updateTodos(UpdateTodo event, Emitter emit) async {
     List<Todo> list = List.from(state.data);
     emit(TaskInProgress(list));
+    await FirebaseFirestore.instance
+        .collection("todos")
+        .doc(event.todo.id)
+        .set(event.todo.toJson());
     List<Todo> todosData = List.from(state.data);
     todosData[event.index] = event.todo;
     emit(TodoUpdated(todosData));
